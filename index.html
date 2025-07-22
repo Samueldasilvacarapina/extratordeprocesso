@@ -92,7 +92,7 @@
     <button onclick="extrairTexto()">Extrair Texto</button>
 
     <h3>🧾 Texto Extraído:</h3>
-    <pre id="output">🕓 Aguardando PDF...</pre>
+    <pre id="output">🕓 Aguardando Se me por o PDF...</pre>
   </div>
 
   <!-- PDF.js -->
@@ -108,7 +108,7 @@
     async function extrairTexto() {
       const fileInput = document.getElementById('fileInput');
       const output = document.getElementById('output');
-      output.textContent = '⏳ Processando...';
+      output.textContent = '⏳ Calma CHOCOLATE BRANCO...';
 
       const file = fileInput.files[0];
       if (!file) {
@@ -135,7 +135,7 @@
             canvas.height = viewport.height;
 
             await page.render({ canvasContext: context, viewport }).promise;
-            output.textContent = '📸 Aplicando OCR...';
+            output.textContent = '📸 To QUASE EXTRAINDO Pera...';
 
             const result = await Tesseract.recognize(canvas, 'por', {
               logger: m => console.log(m)
