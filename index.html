@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Extrator de Texto de PDF</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto Mono', monospace;
+      background: #000;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 40px;
+      margin: 0;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 700px;
+      background: #111;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 20px;
+      color: #ff5555;
+    }
+
+    input[type="file"] {
+      background: #222;
+      color: #fff;
+      padding: 12px;
+      border: 1px solid #444;
+      border-radius: 8px;
+      width: 100%;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #cc0000;
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-bottom: 20px;
+    }
+
+    button:hover {
+      background-color: #ff3333;
+    }
+
+    h3 {
+      margin-top: 20px;
+      margin-bottom: 10px;
+      font-size: 18px;
+      color: #aaa;
+    }
+
+    pre {
+      background: #111;
+      padding: 20px;
+      border-radius: 8px;
+      border: 1px solid #333;
+      color: #a8ff60;
+      white-space: pre-wrap;
+      max-height: 400px;
+      overflow-y: auto;
+      font-size: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>📄 Extrator de Texto de PDF</h1>
+    <input type="file" id="fileInput" accept=".pdf" />
+    <button onclick="extrairTexto()">Extrair Texto</button>
+
+    <h3>🧾 Texto Extraído:</h3>
+    <pre id="output">🕓 Aguardando PDF...</pre>
+  </div>
+
+  <!-- PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  </script>
+
+  <!-- Tesseract.js -->
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+
+  <script>
+    async function extrairTexto() {
+      const fileInput = document.getElementById('fileInput');
+      const output = document.getElementById('output');
+      output.textContent = '⏳ Processando...';
+
+      const file = fileInput.files[0];
+      if (!file) {
+        output.textContent = '❗ Por favor, selecione um arquivo PDF.';
+        return;
+      }
+
+      const fileReader = new FileReader();
+      fileReader.onload = async function () {
+        try {
+          const typedarray = new Uint8Array(this.result);
+          const pdf = await pdfjsLib.getDocument(typedarray).promise;
+          const page = await pdf.getPage(1);
+          const textContent = await page.getTextContent();
+
+          if (textContent.items.length > 0) {
+            const text = textContent.items.map(item => item.str).join(' ');
+            output.textContent = text || 'Nenhum texto encontrado.';
+          } else {
+            const viewport = page.getViewport({ scale: 2 });
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = viewport.width;
+            canvas.height = viewport.height;
+
+            await page.render({ canvasContext: context, viewport }).promise;
+            output.textContent = '📸 Aplicando OCR...';
+
+            const result = await Tesseract.recognize(canvas, 'por', {
+              logger: m => console.log(m)
+            });
+
+            output.textContent = result.data.text || 'OCR não encontrou texto.';
+          }
+        } catch (err) {
+          output.textContent = '❌ Erro ao processar PDF: ' + err.message;
+          console.error(err);
+        }
+      };
+
+      fileReader.readAsArrayBuffer(file);
+    }
+  </script>
+</body>
+
+</html>
