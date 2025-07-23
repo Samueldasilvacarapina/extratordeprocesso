@@ -2,156 +2,313 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8" />
-  <title>Extrator de Processo PDF</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+    <meta charset="UTF-8" />
+    <title>Extrator de Processo PDF</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&family=Roboto:wght@400;500;700&display=swap');
 
-    * {
-      box-sizing: border-box;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-    body {
-      font-family: 'Roboto Mono', monospace;
-      background: #000;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 40px;
-      margin: 0;
-    }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(145deg, #000, #111);
+            color: #eee;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 50px 20px;
+        }
 
-    .container {
-      width: 100%;
-      max-width: 700px;
-      background: #111;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
-    }
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: #151515;
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            border: 1px solid #222;
+        }
 
-    h1 {
-      font-size: 24px;
-      margin-bottom: 20px;
-      color: #ff5555;
-    }
+        h1 {
+            text-align: center;
+            font-size: 26px;
+            margin-bottom: 20px;
+            color: #ff4b4b;
+            letter-spacing: 1px;
+        }
 
-    input[type="file"] {
-      background: #222;
-      color: #fff;
-      padding: 12px;
-      border: 1px solid #444;
-      border-radius: 8px;
-      width: 100%;
-      margin-bottom: 15px;
-    }
+        .file-section {
+            margin-bottom: 20px;
+            text-align: center;
+        }
 
-    button {
-      background-color: #cc0000;
-      color: #fff;
-      border: none;
-      padding: 12px 24px;
-      font-size: 16px;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: background 0.3s ease;
-      margin-bottom: 20px;
-    }
+        input[type="file"] {
+            background: #222;
+            color: #ddd;
+            padding: 12px;
+            border: 1px solid #333;
+            border-radius: 8px;
+            width: 100%;
+            cursor: pointer;
+            transition: 0.3s ease;
+        }
 
-    button:hover {
-      background-color: #ff3333;
-    }
+        input[type="file"]:hover {
+            background: #292929;
+        }
 
-    h3 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      font-size: 18px;
-      color: #aaa;
-    }
+        button {
+            display: inline-block;
+            background: linear-gradient(90deg, #ff3333, #cc0000);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 15px;
+        }
 
-    pre {
-      background: #111;
-      padding: 20px;
-      border-radius: 8px;
-      border: 1px solid #333;
-      color: #a8ff60;
-      white-space: pre-wrap;
-      max-height: 400px;
-      overflow-y: auto;
-      font-size: 15px;
-    }
-  </style>
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        button:hover:not(:disabled) {
+            background: linear-gradient(90deg, #ff6666, #ff1a1a);
+        }
+
+        .output-section {
+            margin-top: 25px;
+        }
+
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .result-table th,
+        .result-table td {
+            padding: 10px;
+            border-bottom: 1px solid #333;
+            text-align: left;
+        }
+
+        .result-table th {
+            color: #ff6666;
+            width: 220px;
+        }
+
+        pre {
+            background: #101010;
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            color: #8aff80;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid #fff;
+            border-top: 3px solid transparent;
+            border-radius: 50%;
+            margin-left: 10px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>📄 Extrator de Processo PDF</h1>
-    <input type="file" id="fileInput" accept=".pdf" />
-    <button onclick="extrairTexto()">Extrair Texto</button>
+    <div class="container">
+        <h1>📄 Extrator de Processo PDF</h1>
 
-    <h3>🧾 Informação Extraída:</h3>
-    <pre id="output">🕓 Aguardando Se me por o PDF...</pre>
-  </div>
+        <div class="file-section">
+            <input type="file" id="fileInput" accept=".pdf" />
+            <br />
+            <button id="extractBtn" onclick="extrairTexto()">🚀 Extrair Dados</button>
+        </div>
 
-  <!-- PDF.js -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-  <script>
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-  </script>
+        <div class="output-section">
+            <h2>📌 Dados Extraídos:</h2>
+            <table class="result-table" id="resultTable"></table>
 
-  <!-- Tesseract.js -->
-  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
+            <h3 style="margin-top:20px; color:#aaa;">📄 Texto Bruto:</h3>
+            <pre id="rawOutput">Selecione um PDF para começar...</pre>
+        </div>
+    </div>
 
-  <script>
-    async function extrairTexto() {
-      const fileInput = document.getElementById('fileInput');
-      const output = document.getElementById('output');
-      output.textContent = '⏳ Calma CHOCOLATE BRANCO...';
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    </script>
 
-      const file = fileInput.files[0];
-      if (!file) {
-        output.textContent = '❗ Por favor, selecione um arquivo PDF.';
-        return;
-      }
+    <!-- Tesseract.js -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
 
-      const fileReader = new FileReader();
-      fileReader.onload = async function () {
-        try {
-          const typedarray = new Uint8Array(this.result);
-          const pdf = await pdfjsLib.getDocument(typedarray).promise;
-          const page = await pdf.getPage(1);
-          const textContent = await page.getTextContent();
-
-          if (textContent.items.length > 0) {
-            const text = textContent.items.map(item => item.str).join(' ');
-            output.textContent = text || 'Nenhum texto encontrado.';
-          } else {
-            const viewport = page.getViewport({ scale: 2 });
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-            canvas.width = viewport.width;
-            canvas.height = viewport.height;
-
-            await page.render({ canvasContext: context, viewport }).promise;
-            output.textContent = '📸 To QUASE EXTRAINDO Pera...';
-
-            const result = await Tesseract.recognize(canvas, 'por', {
-              logger: m => console.log(m)
-            });
-
-            output.textContent = result.data.text || 'OCR não encontrou texto.';
-          }
-        } catch (err) {
-          output.textContent = '❌ Erro ao processar PDF: ' + err.message;
-          console.error(err);
+    <script>
+        // 🔹 Limpa espaços e caracteres extras
+        function limparTexto(texto) {
+            return texto.replace(/\s+/g, ' ').trim();
         }
-      };
 
-      fileReader.readAsArrayBuffer(file);
-    }
-  </script>
+        // 🔹 Busca mais inteligente do número do processo
+        function detectarNumeroProcesso(texto) {
+            // Normaliza o texto (menos espaços quebrados)
+            let txt = texto.replace(/\s+/g, ' ').trim();
+
+            // 1️⃣ Primeiro tenta achar no formato correto CNJ
+            let regexFormatado = /\d{7}-\d{2}\.\d{4}\.\d\.\d{2}\.\d{4}/;
+            let match = txt.match(regexFormatado);
+            if (match) return match[0];
+
+            // 2️⃣ Se não achar, remove tudo que não é número e tenta reconstruir
+            let apenasNumeros = texto.replace(/[^\d]/g, '');
+            if (apenasNumeros.length >= 20) {
+                return (
+                    apenasNumeros.slice(0, 7) + '-' +
+                    apenasNumeros.slice(7, 9) + '.' +
+                    apenasNumeros.slice(9, 13) + '.' +
+                    apenasNumeros.slice(13, 14) + '.' +
+                    apenasNumeros.slice(14, 16) + '.' +
+                    apenasNumeros.slice(16, 20)
+                );
+            }
+
+            return "Não encontrado";
+        }
+
+        // 🔹 Busca chave de consulta (número longo)
+        function formatarChaveConsulta(texto) {
+            const regex = /\d{11,20}/;
+            const match = texto.match(regex);
+            return match ? match[0] : "Não encontrada";
+        }
+
+        // 🔹 Busca valor da causa e normaliza
+        function formatarValorCausa(texto) {
+            const regex = /R\$ ?\d+([\.,]\d{1,3})*/;
+            const match = texto.match(regex);
+            if (!match) return "Não informado";
+            return match[0].replace(/\./g, '').replace(',', '.').replace('.', ',');
+        }
+
+        // 🔹 Extrai qualquer campo baseado no label
+        function extrairCampo(label, texto) {
+            const regex = new RegExp(label + "[:]? ([^\\n]+)", "i");
+            const match = texto.match(regex);
+            return match ? match[1].trim() : "Não encontrado";
+        }
+
+        // 🔹 Monta tabela dos dados extraídos
+        function mostrarTabela(dados) {
+            const tabela = document.getElementById("resultTable");
+            tabela.innerHTML = "";
+
+            for (const [chave, valor] of Object.entries(dados)) {
+                const row = document.createElement("tr");
+                row.innerHTML = `<th>${chave}</th><td>${valor}</td>`;
+                tabela.appendChild(row);
+            }
+        }
+
+        async function extrairTexto() {
+            const fileInput = document.getElementById('fileInput');
+            const rawOutput = document.getElementById('rawOutput');
+            const extractBtn = document.getElementById('extractBtn');
+
+            const file = fileInput.files[0];
+            if (!file) {
+                rawOutput.textContent = '❗ Por favor, selecione um arquivo PDF.';
+                return;
+            }
+
+            extractBtn.disabled = true;
+            extractBtn.innerHTML = '⏳ Extraindo... <span class="loading"></span>';
+            rawOutput.textContent = '⏳ Processando PDF... Aguarde.';
+
+            const fileReader = new FileReader();
+            fileReader.onload = async function () {
+                try {
+                    const typedarray = new Uint8Array(this.result);
+                    const pdf = await pdfjsLib.getDocument(typedarray).promise;
+                    const page = await pdf.getPage(1);
+                    const textContent = await page.getTextContent();
+                    let textoFinal;
+
+                    if (textContent.items.length > 0) {
+                        textoFinal = textContent.items.map(item => item.str).join(' ');
+                    } else {
+                        const viewport = page.getViewport({ scale: 2 });
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        canvas.width = viewport.width;
+                        canvas.height = viewport.height;
+
+                        await page.render({ canvasContext: context, viewport }).promise;
+                        rawOutput.textContent = '📸 Extraindo via OCR...';
+
+                        const result = await Tesseract.recognize(canvas, 'por', { logger: m => console.log(m) });
+                        textoFinal = result.data.text;
+                    }
+
+                    // Limpar e organizar texto
+                    let textoLimpo = limparTexto(textoFinal);
+                    rawOutput.textContent = textoLimpo;
+
+                    // Extrair campos importantes
+                    const dados = {
+                        "Número do Processo": detectarNumeroProcesso(textoLimpo),
+                        "Chave para Consulta": formatarChaveConsulta(textoLimpo),
+                        "Nome Advogado": extrairCampo("Nome", textoLimpo),
+                        "OAB/Sigla": extrairCampo("OAB/Sigla", textoLimpo),
+                        "Data de Envio": extrairCampo("Data Envio", textoLimpo),
+                        "Hora de Envio": extrairCampo("Hora de Envio", textoLimpo),
+                        "Partes": extrairCampo("Nome da\\(s\\) Parte\\(s\\)", textoLimpo),
+                        "Valor da Causa": formatarValorCausa(textoLimpo),
+                        "Órgão Julgador": extrairCampo("Órgão Julgador", textoLimpo),
+                        "Magistrado": extrairCampo("Magistrado", textoLimpo)
+                    };
+
+                    mostrarTabela(dados);
+
+                } catch (err) {
+                    rawOutput.textContent = '❌ Erro ao processar PDF: ' + err.message;
+                    console.error(err);
+                } finally {
+                    extractBtn.disabled = false;
+                    extractBtn.textContent = '🚀 Extrair Dados';
+                }
+            };
+
+            fileReader.readAsArrayBuffer(file);
+        }
+    </script>
 </body>
 
 </html>
